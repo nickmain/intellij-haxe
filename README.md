@@ -2,7 +2,12 @@ Haxe plugin for Intellij IDEA
 ======================================
 
 This plugin allows you to develop [Haxe](http://haxe.org/) programs with Intellij IDEA.
-It requires Intellij IDEA Ultimate or Community Edition, versions 14, 15, IDEA 2016.1 through 2016.3(RC).
+It requires Intellij IDEA Ultimate or Community Edition, versions 14, 15, IDEA 2016.1 through 2016.3.
+
+#### We have moved!
+The primary maintained branch of this plugin has moved to the HaxeFoundation.  Please update your 
+links and git clones to point to [http://github.com/HaxeFoundation/intellij-haxe](http://github.com/HaxeFoundation/intellij-haxe)
+
 
 Install
 -------
@@ -31,7 +36,7 @@ If you already have a project open in IDEA:
 
 ###To manually install the latest or a previous Github release
 
-Download the `intellij-haxe.jar` file from the release you want from [Github releases](https://github.com/TiVo/intellij-haxe/releases).
+Download the `intellij-haxe.jar` file from the release you want from [Github releases](https://github.com/HaxeFoundation/intellij-haxe/releases).
 More recent releases have begun to be named `intellij-haxe-<release>.jar`, where &lt;release&gt; is the version of Idea for which the Jar is built.  (e.g. `intellij-haxe-14.1.1.jar`)
 Make sure that you pick the proper one for your release.  A message should pop up and warn you if a release is incompatible.
 
@@ -51,12 +56,12 @@ If you already have a project open IDEA:
 Build
 -----
 
-This describes the command line build on a Linux platform. To build from Intellij IDEA itself, see the [contributing](CONTRIBUTING.md) document to setup
+This describes the command line build on a Linux platform. To build from within Intellij IDEA itself, see the [contributing](CONTRIBUTING.md) document to setup
 your development environment.  Much more detail is provided there for command line build options as well.
 
 ###Dependencies
 - Ant
-- Oracle JDK 7 or Open JDK 7
+- Oracle JDK 8 or OpenJDK 8 (Versions 7 may be used with IDEA versions prior to 2016.x)
 - Make
 - A bash compatible shell
 
@@ -66,15 +71,15 @@ make
 ```
 
 This will generate a `intelllij-haxe-<release>.jar` file at the root of the project that you can then install from disk
-(see “Install the latest or a previous Github release).  Note that the default make will build the plugin for
-Idea 13.1.6.  To override the default, set the IDEA_VERSION environment variable prior to executing make.
+(see “Install the latest or a previous Github release).  Note that the default make (see Makefile) will build the plugin for
+Idea 2016.2.5.  To override the default, set the IDEA_VERSION environment variable prior to executing make.
 
 ```
-IDEA_VERSION=14.1.1 make
+IDEA_VERSION=14.1.7 make
 ```
 
 Note that building via make will download the requested version of IntelliJ Ultimate (to a temporary directory)
-every time a build is started.  This can be quite slow at times.  For repeated building and testing, 
+every time a build is started.  This can be quite slow at times and prone to failure.  For repeated building and testing,
 we recommended that you set up your machine as described in the [contributing document](CONTRIBUTING.md). 
 
 Test
@@ -92,12 +97,16 @@ This will build and run the tests and display the JUnit report.  Again, you can 
 being tested against by overriding IDEA_VERSION.
 
 ```
-IDEA_VERSION=14.1.1 make test
+IDEA_VERSION=14.1.7 make test
 ```
 
 
 Use the hxcpp debugger
 ----------------------
+
+*NOTE: IDEA Community Edition currently will not start an IDE-based debugging session.  For that,
+IDEA Ultimate is required.  Command-line debugging is available because that is a feature
+of the Haxe language itself.  See the hxcpp-debugger project for more information.*
 
 The hxcpp debugger functionality has been rewritten to conform to the
 Haxe v3.0 debugger.  In order to use this, you must:

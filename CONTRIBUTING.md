@@ -1,8 +1,9 @@
 Contributing
 ============
 
-*NOTE: TiVo and the Haxe Foundation are moving our development focus to IDEA version 14 and later.
-Support for version 13.1 been removed as of release 0.9.8.*
+NOTE: The development team is currently supporting IDEA versions 14 and later.
+Support for version 13.1 been removed as of release 0.9.8.* &nbsp; Support for versions 14
+will likely be dropped sometime during the year 2017.
 
 ##Reporting errors  
 ------------------
@@ -18,7 +19,7 @@ can reproduce the issue.
     - OS and OS version
     - JDK version
 
-- Check if the bug already exists at the [TiVo repository](https://github.com/tivo/intellij-haxe/issues).
+- Check if the bug already exists at the [HaxeFoundation repository](https://github.com/HaxeFoundation/intellij-haxe/issues).
  If it does, add your example to the discussion.
 
 ##Development Environment
@@ -35,12 +36,12 @@ Install the following plugins [from Intellij IDEA plugin manager](https://www.je
 - Plugin DevKit
 - UI Designer
 - Ant Support
+- Grammar-Kit (for bnf compilation) version 1.2.0. (Later versions have not been tested.)
 
 ####Testing
 - JUnit
 
 ####Optional, install if you want to modify lexer/parser:
-- Grammar-Kit (for bnf compilation) version 1.2.0.1 or later.
 - JFlex (for lexer compilation)
 - PsiViewer (for testing grammar)
 
@@ -251,7 +252,8 @@ build that they use for their other work.  That is, casual developers shouldn't
 be using the command line at all and generally shouldn't use the ant targets
 either.  They should use the normal Build menu commands (or their shortcuts).
 
-That said, builds from within IDEA use ant as well: always for preparation of the META-INF files;
+That said, builds from within IDEA use ant as well: always for preparation of the META-INF files
+and generating the parser classes;
 sometimes for building, depending upon how you launch the build.  In all cases,
 before compilation, the "metainf" ant task runs and fills in the blanks (well... the areas 
 between @...@ signs) in plugin.xml with values appropriate to the version of IDEA 
@@ -265,7 +267,7 @@ window shows the ant task output as each dependent task is run.  If you were
 to expand all tasks, you will see that the output is identical to the command line.
 
 However, if you run from the build menu, only the plugin.xml is updated (or
-whatever "metainf" and all of it's dependent tasks do now).  After that, the
+whatever "generateTemplatedFiles" and all of it's dependent tasks do now).  After that, the
 normal IDEA make, build, or what-have-you from the Build menu runs and does
 its thing.  You will see a few ant messages scroll by, and then the normal
 IDEA output will be seen.
@@ -305,6 +307,23 @@ You can either restore the ant defaults inside of idea, (unset ANT_HOME before y
 start IDEA?)  or, the best option, add a property entry to local-build-overrides.  
 See the above discussion regarding [local-build-overrides.xml].
 
+##Debugging
+-------
+
+When debugging, a secondary instance of IDEA starts up and loads the plugin.  At that
+point, the original instance of IDEA is in debug mode and has all of the normal java
+debugging functionality.  You will find yourself swapping back and forth between the
+two instances quite a lot.  Note that it's very easy to think that IDEA has hung in 
+the second instance, when, in reality, you have hit a breakpoint in the first instance.
+
+It is also annoying that focus isn't necessarily changed correctly when swapping
+between two instances.  It is helpful to reset focus by minimizing the second 
+instance (using the mouse :/ ) and restoring it.
+
+If, while debugging, you find that you are missing source files for 
+the /gen tree, then you need to quit and do a local build to get those generated sources
+available for your tree.  (On the other hand, since the files are auto-generated, they
+likely won't be much more help than the decompiled class files.)
 
 ##Testing
 _______
@@ -330,35 +349,28 @@ and debugging sessions running tests with the native support.
 ##Updating Grammar Files
 ______________________
 
-If you change the haxe.bnf or hxml.bnf files, you must (re)generate the parsing files.
+If you change the haxe.bnf or hxml.bnf files, you no longer have to (re)generate
+the parsing files; that is now done through the 'generateTemplatedFiles' ant target,
+which is run before every build, incremental or full.  (It will only rebuild the
+files if they are out of date.)
 
-The grammar-kit plugin is used to generate the parser files.  *Versions 1.1.x 
-work well for this project.  Versions 2.x work intermittently (a bug has been filed).
-You will see a bug appear where APISs that expect discrete elements all-of-a-sudden change to
-requiring list type return values.  If you see this type of error and find yourself
+The grammar-kit plugin is used to generate the parser files.  *Version 1.2.0 
+works well for this project and creates identical code for IDEA versions 14.0 through 2016.2.
+Versions 2.x work intermittently (a bug has been filed).
+Using 1.1.x versions, we saw a bug appear where APISs that expect discrete elements all-of-a-sudden change to
+requiring list type return values, or vice versa.  If you see this type of error and find yourself
 fixing non-generated code to match the generated code, don't do it.  You will find
 yourself changing it back and forth.  The quickest workaround for the bug
 is to restart IDEA.  That usually fixes it.  Since the bug is intermittent,
 it may work one or a hundred times just to start failing.  (We've never seen it
-recover.)  But all of that can be avoided by running the older versions.*
+recover.)  That said, version 1.2.0 and later appear stable.  However, they use
+the list-based APIs, so we have converted the code to that style, however incorrect it may be.*
 
-To regenerate, make your local changes and then press Ctrl+G.  You can compile
-and test with them.  Do NOT check those files in until you have updated the
-comments.  (Otherwise, *every* file will appear updated.)
-
-*(NOTE: To work around a bug in IDEA, it is necessary to change focus to another
-application and then back to IDEA before updating the comments.  Otherwise,
-the process doesn’t do anything.)*
-
-To fix the comments:
-- Open the project window within intellij, select and 
- the right-click on the gen/ tree.  
-- Click on the ‘Update Copyright’ item.  (Should be the third from the bottom.  Sometimes you have to re-open the
- context menu.)  
-- In the ‘Update copyright scope’ dialog, select the “Directory ‘intellij-haxe...’” item and press OK.  
- In a moment, all of the copyrights will have been updated.  A code comparison (or ‘git status’) will
- then show only those files that really changed.
-
+To regenerate, make your changes to the .bnf files and build the project, either via IDEA or
+the command line.  That simple. 
+Parser files will be generated to the project's /gen tree.  Since the /gen tree is no longer
+checked into the source tree, you don't have to worry about copyrights, etc.  Just don't try
+and add them back into the git repository.
 
 ##Contributing your changes
 _________________________
@@ -373,12 +385,12 @@ Goals:
 
 ####Where we are working:
 
-- Future work will take place on the tivo/intellij-haxe/master branch (really, using short-lived 
+- Future work will take place on the HaxeFoundation/intellij-haxe/master branch (really, using short-lived 
 local branches off of that).
 
 ####Where we will release:
 
-- Releases will (usually, simultaneously) occur on the tivo/intellij-haxe repo, 
+- Releases will (usually, simultaneously) occur on the HaxeFoundation/intellij-haxe repo, 
 jetbrains/intellij-haxe repo, and the IDEA plugin repository.  Releases will be made 
 through the github release mechanism.  Binary output (e.g. intellij-haxe.jar) is no longer
 kept in the source tree in the repository.
@@ -389,35 +401,32 @@ kept in the source tree in the repository.
 release notes, commit, tag the build, and create a pull request to JetBrains.  Updating
 the release notes primarily means adding release notes to src/META-INF/plugin.xml, and
 echoing them to CHANGELOG.md.
-- A github "release" will be created on the tivo/intellij-haxe repository.  Binary (.jar) files 
+- A github "release" will be created on the HaxeFoundation/intellij-haxe repository.  Binary (.jar) files 
 for all currently built Idea target versions of the plugin will be added to the release.
 - The released plugin (.jar files)  will be uploaded to the JetBrains IntelliJ IDEA plugin 
 repository.
 
 ####Release environments:
 
-- TiVo releases will be built and tested for the following environments:  
-   OS: Linux(Ubuntu14.04 and Centos6.5), OSX  
-   JVM: Sun Java 1.6  
-   IDEA versions: 14, 14.1, 14.1.6, and 15 (release versions  EAP will not be tracked).
-- JetBrains releases will be built and smoke tested for the following environments:  
+- Haxe Foundation releases will be built and smoke tested for the following environments:  
    OS: Linux(Ubuntu14.04), OSX, Windows  
    JVM: Sun Java 1.6 target, using Sun Java 1.8 compilers (because the Java 1.6 and 1.7 
    maintenance windows have closed)  
    IDEA versions: 14, 14.1, 14.1.7, 15, 2016.2 (latest release versions for each code line)
+- JetBrains releases will be copies of the Haxe Foundation releases.  
 
 ####Who will test:
 
-- TiVo and Haxe Foundation members will test the TiVo release environment.
-- Interested Community members will test the JetBrains release environments.  TiVo 
-  and Haxe Foundation members will ensure that the product can be loaded into the various 
-  environments prior to release.
+- Interested Community members will test the HaxeFoundation release environments.  
+  Community members will ensure that the product can be loaded into the various 
+  environments prior to release.  Lack of interest from the community may delay releases.
 
 ####Unit tests:
 
 - Unit tests will be run and must pass with every commit.  We are using Travis-ci to 
   automate this process.  No merge will be considered or approved unless it passes 
-  unit tests cleanly.
+  unit tests cleanly.  (Note: There are no automated Windows continuous integration builds.  We
+  would like to add this functionality.  Any volunteers?)
 
 ####Release Timing
 
@@ -448,6 +457,7 @@ can test and tag it.
     - `IDEA_VERSION=14.1.4 make`
     - `IDEA_VERSION=14.1.6 make`
     - `IDEA_VERSION=15.0.3 make`
+    - `IDEA_VERSION=2016.2.5 make`
 
 5. Smoke test *each* of the releases.  A smoke test includes loading the releases in a primary instance of IDEA and verifying 
 basic functionality:  
@@ -463,15 +473,15 @@ basic functionality:
     - Run the project
 
 5. Run the unit tests on all versions:
-    - `IDEA_VERSION=2016.2.4 make test`, etc.
-    - or `ant -Dintellij.ultimate.build=<path_to_intellij_2016.2.4> -f build-test.xml`, etc.
+    - `IDEA_VERSION=2016.2.5 make test`, etc.
+    - or `ant -Dintellij.ultimate.build=<path_to_intellij_2016.2.5> -f build-test.xml`, etc.
     
 4. Tag the commit using the agreed upon release number: `git tag -a 0.9.5 -m "Release 0.9.5"`
 
 5. Push the release back up to master: `git push origin master; git push --tags origin master`
 
 6. Create a release on github, using the tag you just created:
-    - [https://github.com/tivo/intellij-haxe/releases](https://github.com/tivo/intellij-haxe/releases)
+    - [https://github.com/HaxeFoundation/intellij-haxe/releases](https://github.com/HaxeFoundation/intellij-haxe/releases)
     - Sign in and draft a new release, using the tag you just added. 
     - Upload all of the release jars to the release.
     - Add the change notes for the most recent changes (between this release and the last).
@@ -498,19 +508,19 @@ Here’s how:
 4. Update src/META-INF/plugin.xml with the change description in the top (Usually "Unreleased changes"
 section).
 5. When your work is complete, merge current sources from master up to your branch, re-test locally,
-then push your branch to TiVo/intellij-haxe.  Travis-ci will automatically start a build and test cycle
+then push your branch to HaxeFoundation/intellij-haxe.  Travis-ci will automatically start a build and test cycle
 applying your changes against the master branch.
 6. Create a pull request, and wait for comments.
 7. If you get comments that require changes, address those and return to step 2.
 8. When you get an “OK to merge,” or "approved," message from anyone on the team: Boyan, @as3boyan;
-Eric, @EBatTiVo; Srikanth, @sganapavarapu, (others as they become regular contributors,) go ahead
+Eric, @EBatTiVo; Ilya, @EliasKu (others as they become regular contributors,) go ahead
 and merge your changes to master.  A clean merge requires no further testing,
 as Travis-ci will do it for you.  However any build break must be addressed immediately.  A build 
 that has conflicts requires manual resolution and must be re-tested locally prior to push.  For regular
 team members, the original requester will be the person to merge since they are best suited to address
 conflicts.  Merges from occasional contributors will be merged by a team member as time and
 resource becomes available.
-9. Check the Travis-ci output (https://travis-ci.org/TiVo/intellij-haxe/builds) to ensure that
+9. Check the Travis-ci output (https://travis-ci.org/HaxeFoundation/intellij-haxe/builds) to ensure that
 everything built correctly. 
 
 

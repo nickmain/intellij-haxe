@@ -29,14 +29,41 @@
   <depends optional="true" config-file="flex-debugger-support.xml">com.intellij.flex</depends>
   <depends optional="true" config-file="debugger-support.xml">com.intellij.modules.ultimate</depends>
 
-  <version>0.10.1 for @plugin.compatibility.description@</version>
+  <version>0.10.1.Test.CompilerCompletion for @plugin.compatibility.description@</version>
   <change-notes>
     <![CDATA[
-      <p>This build is compatible with @plugin.compatibility.description@</p>
+      <p>This jar is compatible with @plugin.compatibility.description@</p>
       <p>It was built using IDEA build @idea.sdk.version@</p>
+      <p>Documentation: http://github.com/HaxeFoundation/intellij-haxe/README.md.</p>
+      <p>Support: http://github.com/HaxeFoundation/intellij-haxe/issues.</p>
       <p/>
+      <p>Unreleased (Feature test):</p>
+      <ul>
+        <li>Support for `@:require` haxe_ver comparing (issue #418)</li>
+        <li>Support for `@:require` and `@:jsRequire` with multiple arguments</li>
+        <li>Reworked code completion using the compiler -- OFF BY DEFAULT!  Turn on in File->Project Structure...</li>
+        <li>Better handling of closing parens, brackets, quotes. (Issues #545, 546)</li>
+        <li>Fix parsing when an anonymous function call is defined and immediately executed. (Issue #544)</li>
+        <li>Updated Haxe logo bitmaps.</li>
+      </ul>
+      <p>0.10.1.1: (community release)</p)
+      <ul>
+        <li>Update compatibility for 2016.3.2</li>
+        <li>Update documentation to refer to HaxeFoundation instead of TiVo.</li>
+      </ul>
       <p>0.10.1: (community release)</p>
       <ul>
+        <li>Use Java's file library for detecting symlinks instead of IDEA's.</li>
+        <li>Formatting: Prevent excess linefeed between doctyp and function.</li>
+        <li>Fix completion for for loop variables. (issue #511)</li>
+        <li>Support for IDEA up through 2016.3.</li>
+        <li>Updated parsing for hxcpp 3.3 compiler error output.</li>
+        <li>Add support for type check syntax (expr : type).  (issue #510)</li>
+        <li>Fixed cursor not indented in class body after var or function declaration. (issue #492, case 1)</li>
+        <li>Highlight "in" and "as" as keywords when they appear in import statements.</li>
+        <li>Highlight "in" as a keyword when it appears in a for statement. (issue #501)</li>
+        <li>Add support for string literals as the keys in structures. (issue #498)</li>
+        <li>Support @:native annotation for functions and variables. (issue #490)</li>
         <li>Stop using the classpath to auto-add external libraries to projects. (issues #477 #100)</li>
         <li>Fix re-ordering imports in certain situations. (issue #494)</li>
         <li>Fix 'never' setter. (issue #486)</li>
@@ -44,10 +71,10 @@
         <li>Fixed creating classes in TEST source roots</li>
         <li>Fixed debug Flash on Haxe-compiler target</li>
         <li>Fixed crash on MACRO_CLASS_LIST assert</li>
-        <li>IDEA 2016 support</li>
         <li>@:deprecated support (issue #459, #473)</li>
         <li>Alias imports support (issue #466)</li>
         <li>Imports optimization: reordering added (issue #471)</li>
+        <li>Fixed typedef multiple extensions highlighting</li>
       </ul>
       <p>0.9.10: (community release)</p>
       <ul>
@@ -668,15 +695,19 @@
 
     <quoteHandler fileType="Haxe" className="com.intellij.plugins.haxe.ide.HaxeQuoteHandler"/>
 
+    <completion.contributor language="Haxe" implementationClass="com.intellij.plugins.haxe.ide.HaxeControllingCompletionContributor" order="FIRST"/>
     <completion.contributor language="any" implementationClass="com.intellij.plugins.haxe.ide.HaxeKeywordCompletionContributor"/>
     <completion.contributor language="Haxe" implementationClass="com.intellij.plugins.haxe.ide.HaxeClassNameCompletionContributor"/>
     <completion.contributor language="Haxe" implementationClass="com.intellij.plugins.haxe.ide.HaxeSmartCompletionContributor"/>
     <completion.contributor language="Haxe" implementationClass="com.intellij.plugins.haxe.ide.HaxeMetaTagsCompletionContributor"/>
-    <completion.contributor language="Haxe" order="LAST" implementationClass="com.intellij.plugins.haxe.ide.HaxeCompilerCompletionContributor"/>
     <completion.contributor language="HXML" implementationClass="com.intellij.plugins.haxe.ide.HXMLCompilerArgumentsCompletionContributor"/>
     <completion.contributor language="HXML" implementationClass="com.intellij.plugins.haxe.ide.HXMLHaxelibCompletionContributor"/>
     <completion.contributor language="HXML" implementationClass="com.intellij.plugins.haxe.ide.HXMLDefineCompletionContributor"/>
     <completion.contributor language="XML" implementationClass="com.intellij.plugins.haxe.ide.XmlHaxelibCompletionContributor"/>
+    <!-- Keep the compiler contributor last because it is slow compared to the internal stuff.
+         Don't use order="LAST" because that puts it after the default contributor, which puts up the "No Suggestions"
+         box, and we want compiler error messages to be displayed instead. -->
+    <completion.contributor language="Haxe" implementationClass="com.intellij.plugins.haxe.ide.HaxeCompilerCompletionContributor"/>
 
     <configurationType implementation="com.intellij.plugins.haxe.runner.HaxeRunConfigurationType"/>
 
